@@ -15,28 +15,49 @@ app.get('/cnn', (req, res) => {
 
       let $ = cheerio.load(html);
       ret =[];
-      let test = $('.cd__headline-text').each((element, i) => {
-        ret.push({
-          id: element,
-          href: "https://www.cnn.com" + i.parent.attribs.href,
-          title: i.children[0].data
-        })
-      });
-      // console.log(test);
+      let test = $('.cd__headline-text').each((index, element) => {
 
+        ret.push({
+          id: index,
+          href: "https://www.cnn.com" + element.parent.attribs.href,
+          title: element.children[0].data
+        });
+      });
       console.log(ret);
       return res.send(ret);
     }).catch(err =>{
       console.log(err);
     });
-
-    // let html = await (async function() {
-    //   axios.get("https://www.cnn.com/").data
-    // })();
-    
-    // return res.send(html);
     
 });
+
+app.get('/yahoo/:sub', (req, res) => {
+
+  //get the sub page within yahoo
+  let sub = req.params.sub;
+  console.log(sub);
+  axios.get("https://news.yahoo.com/" + sub).then(response=>{
+    let html = response.data;
+
+    let $ = cheerio.load(html);
+    ret =[];
+    let test = $('.not-isInStreamVideoEnabled').each((index, element) => {
+      // console.log($(element)['0'].attribs.href);
+
+      ret.push({
+        id: index,
+        href: 'https://news.yahoo.com'+$(element)['0'].attribs.href,
+        title: $(element).text()
+      });
+    });
+    console.log(ret);
+    return res.send(ret);
+  }).catch(err =>{
+    console.log(err);
+  });
+  
+});
+
 
 
 app.listen(PORT, () =>
