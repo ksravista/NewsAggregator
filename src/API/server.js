@@ -1,3 +1,4 @@
+
 const cheerio = require('cheerio');
 let axios = require("axios");
 
@@ -8,57 +9,54 @@ const PORT = 4000;
 app.use(express.json());
 app.use(require("body-parser").json());
 
-app.get('/cnn', (req, res) => {
+app.get('/cnn/:sub', (req, res) => {
 
-    axios.get("https://www.cnn.com/us").then(response=>{
-      let html = response.data;
+  let sub = req.params.sub;
+  axios.get('https://www.cnn.com/' + sub).then((response) => {
 
-      let $ = cheerio.load(html);
-      ret =[];
-      let test = $('.cd__headline-text').each((index, element) => {
+    let html = response.data;
 
-        ret.push({
-          id: index,
-          href: "https://www.cnn.com" + element.parent.attribs.href,
-          title: element.children[0].data
-        });
+    let $ = cheerio.load(html);
+    ret = [];
+    let test = $('.cd__headline-text').each((index, element) => {
+
+      ret.push({
+        id: index,
+        href: "https://www.cnn.com" + element.parent.attribs.href,
+        title: element.children[0].data
       });
-      console.log(ret);
-      return res.send(ret);
-    }).catch(err =>{
-      console.log(err);
     });
-    
+    return res.send(ret);
+  }).catch(err => {
+    console.log(err);
+  });
+
+
 });
 
 app.get('/yahoo/:sub', (req, res) => {
 
   //get the sub page within yahoo
   let sub = req.params.sub;
-  console.log(sub);
-  axios.get("https://news.yahoo.com/" + sub).then(response=>{
+  axios.get("https://news.yahoo.com/" + sub).then(response => {
     let html = response.data;
 
     let $ = cheerio.load(html);
-    ret =[];
+    ret = [];
     let test = $('.not-isInStreamVideoEnabled').each((index, element) => {
-      // console.log($(element)['0'].attribs.href);
-
       ret.push({
         id: index,
-        href: 'https://news.yahoo.com'+$(element)['0'].attribs.href,
+        href: 'https://news.yahoo.com' + $(element)['0'].attribs.href,
         title: $(element).text()
       });
     });
     console.log(ret);
     return res.send(ret);
-  }).catch(err =>{
+  }).catch(err => {
     console.log(err);
   });
-  
+
 });
-
-
 
 app.listen(PORT, () =>
   console.log(`Example app listening on port ${PORT}!`),
